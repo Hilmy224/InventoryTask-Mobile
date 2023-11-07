@@ -152,7 +152,8 @@ home: MyHomePage(),
 ```
 
 ### 3) Result
-[insert image]
+![image](https://github.com/Hilmy224/InventoryTask-Mobile/assets/108089955/365c9f88-cf55-476a-b6a6-af2f5cbf6572)
+
 
 ## Diffrence between stateless and statefull widget in Flutter
 __Stateless widgets__ adalah widget yang tidak berubah, artinya properti mereka tidak dapat berubah setelah diatur. Mereka tidak memiliki keadaan internal yang harus dikelola. Mereka tidak bergantung pada data eksternal atau masukan pengguna, dan mereka tidak mengubah penampilan atau perilaku mereka dari waktu ke waktu. Contoh dari stateless widgets meliputi `Text`, `Icon`, `IconButton`, dan `RaisedButton`.

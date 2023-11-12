@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:catharsis_plus/widgets/left_drawer.dart';
+import 'package:catharsis_plus/widgets/shop_card.dart';
 
 class MyHomePage extends StatelessWidget {
   MyHomePage({Key? key}) : super(key: key);
@@ -26,7 +28,7 @@ class MyHomePage extends StatelessWidget {
           'CatharsisPlus',
         ),
       ),
-      backgroundColor: Color(0xFFF67280),
+      backgroundColor: const Color(0xFFF67280),
       body: SingleChildScrollView(
         // Widget wrapper yang dapat discroll
         child: Padding(
@@ -38,7 +40,7 @@ class MyHomePage extends StatelessWidget {
                 padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
                 // Widget Text untuk menampilkan tulisan dengan alignment center dan style yang sesuai
                 child: Text(
-                  'Vault',
+                  'Vault', // Text yang menandakan toko
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 30,
@@ -64,64 +66,9 @@ class MyHomePage extends StatelessWidget {
           ),
         ),
       ),
+      // Add drawer as parameter of the Scaffold widget
+    drawer: const LeftDrawer(),
     );
   }
 }
 
-class StoreItem {
-  final String name;
-  final IconData icon;
-  final Color color;
-
-  StoreItem(this.name, this.icon, this.color);
-
-  //Change the colour
-  static final StoreItem lihatItem = StoreItem("Lihat Item", Icons.checklist, Color(0xFFC06C84));
-  static final StoreItem tambahItem = StoreItem("Tambah Item", Icons.add_box, Color(0xFF6C5B7B));
-  static final StoreItem logout = StoreItem("Logout", Icons.accessible_forward_sharp, Color(0xFF355C7D));
-}
-
-class ShopCard extends StatelessWidget {
-  final StoreItem item;
-
-  const ShopCard(this.item, {super.key}); // Constructor
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: item.color,
-      child: InkWell(
-        // Area responsive terhadap sentuhan
-        onTap: () {
-          // Memunculkan SnackBar ketika diklik
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(
-                content: Text("Kamu telah menekan tombol ${item.name}!")));
-        },
-        child: Container(
-          // Container untuk menyimpan Icon dan Text
-          padding: const EdgeInsets.all(8),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  item.icon,
-                  color: Colors.white,
-                  size: 30.0,
-                ),
-                const Padding(padding: EdgeInsets.all(3)),
-                Text(
-                  item.name,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

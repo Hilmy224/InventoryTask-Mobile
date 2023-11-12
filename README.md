@@ -515,12 +515,11 @@ Untuk tampilan dapat dibuat sebagai berikut:
  }
 ```
 
-## LeftDrawer and ShopForm Result
-![image](https://github.com/Hilmy224/InventoryTask-Mobile/assets/108089955/a1dfc447-5d52-4541-9c9e-a24378c45359)
-
-
 ## ShopCard Placing
 > Buat sebuah file bernama `shop_card.dart` dan isinya dengan class `StoreItem` dan class `ShopCard` dari `menu.dart` sebelumnya dan pastikan import yang sesuai agar penggantian halaman bekerja
+
+## LeftDrawer and ShopForm Result
+![image](https://github.com/Hilmy224/InventoryTask-Mobile/assets/108089955/a1dfc447-5d52-4541-9c9e-a24378c45359)
 
 
 ## Diffrence Between `Navigator.push()` and `Navigator.pushReplacement()`

@@ -522,14 +522,67 @@ Untuk tampilan dapat dibuat sebagai berikut:
 ![image](https://github.com/Hilmy224/InventoryTask-Mobile/assets/108089955/a1dfc447-5d52-4541-9c9e-a24378c45359)
 
 
+
+
 ## Diffrence Between `Navigator.push()` and `Navigator.pushReplacement()`
-and example
+__Navigator.push()__ digunakan untuk berpindah ke layar baru dan menambahkannya di atas tumpukan navigasi. Ini berarti layar baru ditampilkan dan layar sebelumnya tetap ada di memori, memungkinkan pengguna kembali ke layar sebelumnya dengan mengeluarkan layar teratas dari tumpukan navigasi. Ini umumnya digunakan dalam situasi di mana Anda ingin pengguna dapat kembali ke layar sebelumnya.
+```dart
+Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => SecondRoute()),
+);
+```
+Sedangkan, __Navigator.pushReplacement()__ digunakan untuk menggantikan rute saat ini di tumpukan navigasi dengan yang baru. Ini berarti layar baru ditampilkan dan layar sebelumnya dihapus dari memori. Pengguna tidak akan dapat kembali ke layar sebelumnya karena layar tersebut tidak lagi ada di tumpukan navigasi. Ini umumnya digunakan dalam situasi di mana Anda tidak ingin pengguna kembali ke layar sebelumnya, seperti berpindah dari layar login ke layar utama setelah otentikasi yang berhasil.
+```dart
+Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => NewPage()),
+);
+```
+## Flutter Layouts
+### Row and Column Layouts
++ Rows and Columns digunakan untuk menyusun child widgets dalam arah horizontal dan vertikal.  
++ Dapat mengendalikan bagaimana suatu baris atau kolom menyusun anak-anaknya menggunakan properti mainAxisAlignment dan crossAxisAlignment.  
++ Rows and Columns memungkinkan nesting, artinya Anda dapat menempatkan baris di dalam kolom dan sebaliknya untuk membuat tata letak yang kompleks.
+
+### Container Layout
++ Widget Container digunakan untuk menambahkan padding, margin, batas, warna latar belakang, atau dekorasi lainnya ke dalam suatu widget.
++ Widget ini dapat berisi satu child widget, namun widget anak tersebut dapat berupa Baris (Row), Kolom (Column), atau bahkan root dari sebuah widget tree.
++ Widget Container juga berguna untuk mengubah dimensi dari widget.
+
+### Stack Layout
++ Widget Stack digunakan untuk menumpuk beberapa child widget di atas satu sama lain.
++ Widget pertama dalam daftar child widget adalah base widget, dan widget anak berikutnya ditumpuk di atas base widget  tersebut.
+
+### ListView Layout
++ Widget ListView adalah widget mirip kolom yang secara otomatis menyediakan scrolling ketika kontennya terlalu panjang untuk kotak render-nya.
++ Widget ini kurang dapat dikonfigurasi dibandingkan dengan Column tetapi lebih mudah digunakan dan mendukung scrolling.
+
+### GridView
++  GridView adalah widget yang digunakan untuk menampilkan banyak widget sebagai 2D array
+
+## Element Input on the Form that is used
+### TextFormField
+TextFormField adalah widget kenyamanan yang membungkus widget TextField dalam FormField. Digunakan ketika Anda ingin menangkap masukan teks dari pengguna dalam sebuah formulir. Widget ini dapat diintegrasikan dengan widget Form untuk validasi formulir dan penanganan.
+TextFormField menyediakan fungsionalitas tambahan yang tidak dimiliki TextField, seperti validasi formulir dan kemampuan untuk mengingat masukan teks saat formulir dibuat ulang. Jika Anda perlu membuat formulir yang lebih besar dengan beberapa kolom masukan dan validasi, disarankan untuk menggunakan TextFormField.
+### ElevatedButton
+ElevatedButton adalah tombol Material Design yang ditinggikan. Digunakan untuk membuat tombol yang diisi dan naik (atau terangkat) ketika ditekan. Ketinggian ini menciptakan efek 3D dan membuat tombol lebih terlihat.
+ElevatedButton digunakan ketika Anda perlu melakukan tindakan ketika pengguna menekan tombol. Ini bisa menjadi mengirimkan formulir, berpindah ke layar baru, atau fungsionalitas interaktif lainnya. Penampilan tombol juga dapat disesuaikan menggunakan properti style.
 
 ## Clean Architecture in flutter
-Implementation
+Clean architecture, kadang disebut sebagai Onion Architecture, adalah prinsip desain perangkat lunak yang menekankan seperation of concern dalam perangkat lunak. Tujuannya adalah membuat sistem lebih mudah dipahami, fleksibel, dan mudah dipelihara. Ketika digunakan dalam aplikasi Flutter, arsitektur ini biasanya dibagi menjadi tiga lapisan: Domain, Data, dan Presentation.
 
-## Element Input on the Form that is used and Why?
++ Domain Layer: Ini adalah lapisan paling dalam dari aplikasi dan berisi Entities, Use Cases, dan Repository Interfaces. Ditulis sepenuhnya dengan Dart tanpa dependensi Flutter. Lapisan domain berkaitan dengan logika bisnis aplikasi.
 
-## _Layout_ Widget that are Used
++ Data Layer: Lapisan ini bertanggung jawab atas pengambilan data. Ini dapat mengambil data dari berbagai sumber seperti server API, basis data lokal, atau keduanya. Lapisan ini mengimplementasikan kelas-kelas abstrak yang ditentukan di lapisan domain. Keuntungan utama dari lapisan ini adalah memungkinkan Anda beralih sumber data tanpa memengaruhi logika bisnis.
+
++ Presentation Layer (App): Ini adalah lapisan di mana UI dan handler event didefinisikan. Ini adalah lapisan yang paling bergantung pada framework dan berisi UI aplikasi Anda. Setiap halaman dalam aplikasi mendefinisikan setidaknya tiga kelas: Controller, Presenter, dan View. Controller menangani event UI, dan View membangun UI.
+
+> Menerapkan clean architecture dalam aplikasi Flutter dapat membuat kode lebih mudah dipelihara, dapat diuji, dan dapat diskalakan. Namun, hal itu mungkin terlalu berlebihan untuk proyek-proyek kecil karena memerlukan jumlah kode yang lebih banyak untuk mengimplementasikannya.
+
+
+## Bonus
+![image](https://github.com/Hilmy224/InventoryTask-Mobile/assets/108089955/a2e53f3d-0415-4aa2-814f-842a21562189)
+
 
 

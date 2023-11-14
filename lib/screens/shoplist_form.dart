@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:catharsis_plus/widgets/left_drawer.dart'; // Import the previously created drawer
+import 'package:catharsis_plus/widgets/shop_card.dart';
 
 class ShopFormPage extends StatefulWidget {
    const ShopFormPage({super.key});
@@ -11,9 +12,12 @@ class ShopFormPage extends StatefulWidget {
 class _ShopFormPageState extends State<ShopFormPage> {
  final _formKey = GlobalKey<FormState>();
  String _name = "";
+ String _type="";
  int _amount = 0;
  String _severity="";
+ String _causality="";
  String _description = "";
+ //add date later
 
  @override
  Widget build(BuildContext context) {
@@ -35,6 +39,7 @@ class _ShopFormPageState extends State<ShopFormPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               //Item Name Input
               Padding(
             padding: const EdgeInsets.all(8.0),
@@ -56,6 +61,34 @@ class _ShopFormPageState extends State<ShopFormPage> {
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
                     return "Name cannot be empty!";
+                  }
+                  return null;
+                },
+                
+              ),
+            ),
+
+            //Type Input
+            Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField( 
+                decoration: InputDecoration(
+                  hintText: "Item Type",
+                  labelText: "Item Type",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                ),
+
+                onChanged: (String? value) {
+                  setState(() {
+                    _type = value!;
+                  });
+                },
+
+                validator: (String? value) {
+                  if (value == null || value.isEmpty) {
+                    return "Type cannot be empty!";
                   }
                   return null;
                 },
@@ -124,6 +157,34 @@ class _ShopFormPageState extends State<ShopFormPage> {
               ),
             ),
 
+            //Causality Input
+            Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField( 
+                decoration: InputDecoration(
+                  hintText: "How???",
+                  labelText: "Causality",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                ),
+
+                onChanged: (String? value) {
+                  setState(() {
+                    _causality = value!;
+                  });
+                },
+
+                validator: (String? value) {
+                  if (value == null || value.isEmpty) {
+                    return "Causality cannot be empty!";
+                  }
+                  return null;
+                },
+                
+              ),
+            ),
+
             //Description Input  
             Padding(
             padding: const EdgeInsets.all(8.0),
@@ -168,6 +229,11 @@ class _ShopFormPageState extends State<ShopFormPage> {
                 
                 onPressed: () {
                 if (_formKey.currentState!.validate()) {
+                  //Save it
+                  setState(() {
+                    savedItems.add(Item(_name,_type,_amount,_severity,_causality,_description));
+                  });
+                  
                 showDialog(
                 context: context,
                 builder: (context) {
@@ -179,8 +245,10 @@ class _ShopFormPageState extends State<ShopFormPage> {
                             CrossAxisAlignment.start,
                         children: [
                           Text('Name: $_name'),
+                          Text('Type: $_type'),
                           Text('Harga: $_amount'),
                           Text('Severity: $_severity'),
+                          Text('Cause: $_causality'),
                           Text('Deskripisi: $_description'),
                         ],
                       ),

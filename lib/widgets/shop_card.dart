@@ -1,3 +1,4 @@
+import 'package:catharsis_plus/screens/item_display.dart';
 import 'package:flutter/material.dart';
 import 'package:catharsis_plus/screens/shoplist_form.dart';
 
@@ -14,6 +15,21 @@ class StoreItem {
   static final StoreItem tambahItem = StoreItem("Tambah Item", Icons.add_box,  Color(0xFF6C5B7B));
   static final StoreItem logout = StoreItem("Logout", Icons.accessible_forward_sharp,  Color(0xFF6C5B7B));
 }
+
+//Add a class for items
+class Item{
+  String name="";
+  String type="";
+  int amount=0;
+  String severity="";
+  String causality="";
+  String description="";
+
+  Item(this.name,this.type,this.amount,this.severity,this.causality,this.description);
+}
+
+//Make an instance of it
+List<Item> savedItems=[];
 
 class ShopCard extends StatelessWidget {
   final StoreItem item;
@@ -39,6 +55,13 @@ class ShopCard extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (context) => ShopFormPage(),
                   ));
+          }
+          else if (item.name == "Lihat Item") {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const Itemvault(),
+                ));
           }
         },
         child: Container(

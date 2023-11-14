@@ -1,3 +1,4 @@
+import 'package:catharsis_plus/screens/item_display.dart';
 import 'package:flutter/material.dart';
 import 'package:catharsis_plus/screens/menu.dart';
 import 'package:catharsis_plus/screens/shoplist_form.dart';
@@ -58,6 +59,18 @@ class LeftDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => ShopFormPage(),
+                  ));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.category_rounded),
+            title: const Text('View Items'),
+            // redirect to ShopFormPage
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Itemvault(),
                   ));
             },
           ),

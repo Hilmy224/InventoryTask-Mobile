@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:catharsis_plus/models/product.dart';
+import 'package:catharsis_plus/screens/item_deets.dart';
+
 
 
 
@@ -17,7 +19,7 @@ class Itemvault extends StatefulWidget {
 
 class _ItemVault extends State<Itemvault> {
 Future<List<Product>> fetchProduct() async {
-    // TODO: Change the URL to your Django app's URL. Don't forget to add the trailing slash (/) if needed.
+    // get-product/
     var url = Uri.parse(
         'http://127.0.0.1:8000/json/');
     var response = await http.get(
@@ -84,16 +86,18 @@ Widget build(BuildContext context) {
                                     Text("${snapshot.data![index].fields.amount}"),
                                     const SizedBox(height: 10),
                                     Text(
-                                        "${snapshot.data![index].fields.species}"),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                        "${snapshot.data![index].fields.spiritStatus}"),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                        "${snapshot.data![index].fields.causeOfDeath}"),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                        "${snapshot.data![index].fields.description}")
+                                        "${snapshot.data![index].fields.description}"),
+                                    ElevatedButton(
+                                        onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => DetailPage(item: snapshot.data![index]),
+                                          ),
+                                        );
+                                      },
+                                      child: const Text('Detail Item'),
+                                    ),
                                     
                                 ],
                                 ),

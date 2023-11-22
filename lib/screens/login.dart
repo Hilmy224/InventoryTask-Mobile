@@ -2,7 +2,7 @@ import 'package:catharsis_plus/screens/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-
+import 'package:catharsis_plus/screens/register.dart';
 void main() {
     runApp(const LoginApp());
 }
@@ -59,6 +59,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             obscureText: true,
                         ),
+                    
                         const SizedBox(height: 24.0),
                         ElevatedButton(
                             onPressed: () async {
@@ -105,6 +106,20 @@ class _LoginPageState extends State<LoginPage> {
                                 }
                             },
                             child: const Text('Login'),
+                        ),
+                        const SizedBox(height: 24.0),
+                        ElevatedButton(
+                          onPressed: () {
+                              _usernameController.clear();
+                              _passwordController.clear();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const RegistrationPage(),
+                                ),
+                              );
+                          },
+                          child: const Text('Register'),
                         ),
                     ],
                 ),

@@ -584,5 +584,548 @@ Clean architecture, kadang disebut sebagai Onion Architecture, adalah prinsip de
 ## Bonus
 ![image](https://github.com/Hilmy224/InventoryTask-Mobile/assets/108089955/a2e53f3d-0415-4aa2-814f-842a21562189)
 
+# Week 09
+# Back to The Past
+First we will try to make our previous web server compatible with our mobile apps by adding these specific things:
++ login and logout
++ Create Product Form and View Items
+
+
+## Authentication And Logout
+First we set up and authentification system in django by making a new django app inside called `authentication` and registering it inside the `settings.py`. Next is running `pip install django-cors-headers` and registering `corsheaders` into it as well. Don't forget to put `corsheaders.middleware.CorsMiddleware` inside the `MIDDLEWARE`.
+> when pushing if it fails try putting `django-cors-headers` inside the `requirements.txt` file
+
+Next we add these into the `settings.py`:
+```python
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
+```
+
+Inside the `authentication` app we are going to put view method inside its `views.py`:
+```python 
+from django.shortcuts import render
+from django.contrib.auth import authenticate, login as auth_login
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import logout as auth_logout
+
+@csrf_exempt
+def login(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        if user.is_active:
+            auth_login(request, user)
+            # Successful login status.
+            return JsonResponse({
+                "username": user.username,
+                "status": True,
+                "message": "Login successful!"
+                # Add other data if you want to send data to Flutter.
+            }, status=200)
+        else:
+            return JsonResponse({
+                "status": False,
+                "message": "Login failed, account disabled."
+            }, status=401)
+
+    else:
+        return JsonResponse({
+            "status": False,
+            "message": "Login failed, check email or password again."
+        }, status=401)
+    
+@csrf_exempt
+def logout(request):
+    username = request.user.username
+
+    try:
+        auth_logout(request)
+        return JsonResponse({
+            "username": username,
+            "status": True,
+            "message": "Logged out successfully!"
+        }, status=200)
+    except:
+        return JsonResponse({
+        "status": False,
+        "message": "Logout failed."
+        }, status=401)
+
+```
+To link up those function make a `urls.py` insde the app that has the following content:
+```python
+from django.urls import path
+from authentication.views import login,logout
+
+app_name = 'authentication'
+
+urlpatterns = [
+    path('login/', login, name='login'),
+    path('logout/', logout, name='logout'),
+]
+```
+> Don't Forget to put `path('auth/', include('authentication.urls'))` insisde the root folder to use it
+
+## Form for Later
+In our django app `main/views.py` add the following method and imports so we can call them later in our mobile app:
+```python
+#Flutter Json Response
+from django.http import JsonResponse
+
+@csrf_exempt
+def create_product_flutter(request):
+    if request.method == 'POST':
+        
+        data = json.loads(request.body)
+
+        new_product = Item.objects.create(
+            user = request.user,
+            name = data["name"],
+            species= data['species'],
+            amount = int(data["amount"]),
+            spiritStatus=data["spiritStatus"],
+            causeOfDeath=data["causeOfDeath"],
+            description = data["description"]
+        )
+
+        new_product.save()
+
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
+        
+def get_product_json(request):
+    product_item = Item.objects.filter(user=request.user)
+    return HttpResponse(serializers.serialize('json', product_item))
+```
+
+# Back to Present
+After finishing the previous series of instruction we can now soley focus on integrating our mobile app.
+
+## Authentication Login and Logout
+For Login we are goin to make a  `login.dart` inside `lib/screens` folder with the following content:
+```dart
+import 'package:catharsis_plus/screens/menu.dart';
+import 'package:flutter/material.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+
+void main() {
+    runApp(const LoginApp());
+}
+
+class LoginApp extends StatelessWidget {
+const LoginApp({super.key});
+
+@override
+Widget build(BuildContext context) {
+    return MaterialApp(
+        title: 'Login',
+        theme: ThemeData(
+            primarySwatch: Colors.blue,
+    ),
+    home: const LoginPage(),
+    );
+    }
+}
+
+class LoginPage extends StatefulWidget {
+    const LoginPage({super.key});
+
+    @override
+    _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+    final TextEditingController _usernameController = TextEditingController();
+    final TextEditingController _passwordController = TextEditingController();
+
+    @override
+    Widget build(BuildContext context) {
+        final request = context.watch<CookieRequest>();
+        return Scaffold(
+            appBar: AppBar(
+                title: const Text('Login'),
+            ),
+            body: Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                        TextField(
+                            controller: _usernameController,
+                            decoration: const InputDecoration(
+                                labelText: 'Username',
+                            ),
+                        ),
+                        const SizedBox(height: 12.0),
+                        TextField(
+                            controller: _passwordController,
+                            decoration: const InputDecoration(
+                                labelText: 'Password',
+                            ),
+                            obscureText: true,
+                        ),
+                        const SizedBox(height: 24.0),
+                        ElevatedButton(
+                            onPressed: () async {
+                                String username = _usernameController.text;
+                                String password = _passwordController.text;
+
+                                // Check credentials
+                                // TODO: Change the URL and don't forget to add a trailing slash (/) at the end of the URL!
+                                // To connect the Android emulator to Django on localhost,
+                                // use the URL http://10.0.2.2/
+                                final response = await request.login("http://127.0.0.1:8000/auth/login/", {
+                                'username': username,
+                                'password': password,
+                                });
+
+                                if (request.loggedIn) {
+                                    String message = response['message'];
+                                    String uname = response['username'];
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => MyHomePage()),
+                                    );
+                                    ScaffoldMessenger.of(context)
+                                        ..hideCurrentSnackBar()
+                                        ..showSnackBar(
+                                            SnackBar(content: Text("$message Welcome, $uname.")));
+                                    } else {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                            title: const Text('Login Failed'),
+                                            content:
+                                                Text(response['message']),
+                                            actions: [
+                                                TextButton(
+                                                    child: const Text('OK'),
+                                                    onPressed: () {
+                                                        Navigator.pop(context);
+                                                    },
+                                                ),
+                                            ],
+                                        ),
+                                    );
+                                }
+                            },
+                            child: const Text('Login'),
+                        ),
+                    ],
+                ),
+            ),
+        );
+    }
+}
+```
+> don't forget to replace the `home: HomePage()` into `home: LoginPage())` inside of `main.dart`
+
+For logout do the following:
++ Inside `lib/widgets/shop_card.dart` import the following:
+```dart
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+
+//Also add this before build
+....
+Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+    return Material(
+...
+```
++ Change the `onTap: () {...}` in the Inkwell widget to `onTap: () async {...}`a dn also add the following after the other if else statments:
+```dart
+else if (item.name == "Logout") {
+        final response = await request.logout(
+            // TODO: Change the URL to your Django app's URL. Don't forget to add the trailing slash (/) if needed.
+            "http://127.0.0.1:8000/auth/logout/");
+        String message = response["message"];
+        if (response['status']) {
+          String uname = response["username"];
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("$message Good bye, $uname."),
+          ));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("$message"),
+          ));
+        }
+      }
+```
+
+## Forms And Displaying Items
+First we are going to make  `lib/models/product.dart`, inside this we are going to make a custom model using [QuickType](https://app.quicktype.io) to transform out json format to the model.
+> all you have to do is copy paste your previous web <appname>/json/1 item and put it in the format you want in this case a json with dart language.
+
+Inside the `product.dart` put the previously copy paste from quicktype:
+```dart
+// To parse this JSON data, do
+//
+//     final product = productFromJson(jsonString);
+
+import 'dart:convert';
+
+List<Product> productFromJson(String str) => List<Product>.from(json.decode(str).map((x) => Product.fromJson(x)));
+
+String productToJson(List<Product> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
+class Product {
+    String model;
+    int pk;
+    Fields fields;
+
+    Product({
+        required this.model,
+        required this.pk,
+        required this.fields,
+    });
+
+    factory Product.fromJson(Map<String, dynamic> json) => Product(
+        model: json["model"],
+        pk: json["pk"],
+        fields: Fields.fromJson(json["fields"]),
+    );
+
+    Map<String, dynamic> toJson() => {
+        "model": model,
+        "pk": pk,
+        "fields": fields.toJson(),
+    };
+}
+
+class Fields {
+    dynamic user;
+    String name;
+    String species;
+    int amount;
+    String spiritStatus;
+    String causeOfDeath;
+    String description;
+    DateTime dateAdded;
+
+    Fields({
+        required this.user,
+        required this.name,
+        required this.species,
+        required this.amount,
+        required this.spiritStatus,
+        required this.causeOfDeath,
+        required this.description,
+        required this.dateAdded,
+    });
+
+    factory Fields.fromJson(Map<String, dynamic> json) => Fields(
+        user: json["user"],
+        name: json["name"],
+        species: json["species"],
+        amount: json["amount"],
+        spiritStatus: json["spiritStatus"],
+        causeOfDeath: json["causeOfDeath"],
+        description: json["description"],
+        dateAdded: DateTime.parse(json["date_added"]),
+    );
+
+    Map<String, dynamic> toJson() => {
+        "user": user,
+        "name": name,
+        "species": species,
+        "amount": amount,
+        "spiritStatus": spiritStatus,
+        "causeOfDeath": causeOfDeath,
+        "description": description,
+        "date_added": "${dateAdded.year.toString().padLeft(4, '0')}-${dateAdded.month.toString().padLeft(2, '0')}-${dateAdded.day.toString().padLeft(2, '0')}",
+    };
+}
+```
+Next we are going to try to fetch but before we do that we have to make sure our app can access the internet by adding     `<uses-permission android:name="android.permission.INTERNET" />` inside `android/app/src/main/AndroidManifest.xml` file.
+
+Continuing on, we now use the previous `item_display.dart` or make one if you havent and add the following code and imports:
+```dart
+import 'package:catharsis_plus/widgets/shop_card.dart';
+import 'package:flutter/material.dart';
+import 'package:catharsis_plus/widgets/left_drawer.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:catharsis_plus/models/product.dart';
+
+
+
+class Itemvault extends StatefulWidget {
+    const Itemvault({Key? key}) : super(key: key);
+
+    @override
+    _ItemVault createState() =>  _ItemVault();
+}
+
+class _ItemVault extends State<Itemvault> {
+Future<List<Product>> fetchProduct() async {
+    // TODO: Change the URL to your Django app's URL. Don't forget to add the trailing slash (/) if needed.
+    var url = Uri.parse(
+        'http://127.0.0.1:8000/json/');
+    var response = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+    );
+
+    // decode the response to JSON
+    var data = jsonDecode(utf8.decode(response.bodyBytes));
+
+    // convert the JSON to Product object
+    List<Product> list_product = [];
+    for (var d in data) {
+        if (d != null) {
+            list_product.add(Product.fromJson(d));
+        }
+    }
+    return list_product;
+}
+
+@override
+Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+        title: const Text('LET THE BODIES HIT THE FLOOR'),
+        ),
+        drawer: const LeftDrawer(),
+        body: FutureBuilder(
+            future: fetchProduct(),
+            builder: (context, AsyncSnapshot snapshot) {
+                if (snapshot.data == null) {
+                    return const Center(child: CircularProgressIndicator());
+                } else {
+                    if (!snapshot.hasData) {
+                    return const Column(
+                        children: [
+                        Text(
+                            "No bodies available :(",
+                            style:
+                                TextStyle(color: Color(0xff59A5D8), fontSize: 20),
+                        ),
+                        SizedBox(height: 8),
+                        ],
+                    );
+                } else {
+                    return ListView.builder(
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (_, index) => Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                    Text(
+                                    "${snapshot.data![index].fields.name}",
+                                    style: const TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.bold,
+                                    ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text("${snapshot.data![index].fields.amount}"),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                        "${snapshot.data![index].fields.species}"),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                        "${snapshot.data![index].fields.spiritStatus}"),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                        "${snapshot.data![index].fields.causeOfDeath}"),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                        "${snapshot.data![index].fields.description}")
+                                    
+                                ],
+                                ),
+                            ));
+                    }
+                }
+            }));
+    }
+}
+
+```
+
+> We don't really need to connect it to our shopcard and left_drawer file anymore since we did it last time
+
+Now we are going to try to make it so we are able to create a product that also updates in the web.
+
++ Inside `shoplist_form.dart` add imports and the following right before build
+```dart
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:catharsis_plus/models/product.dart';
+...
+@override
+Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+
+    return Scaffold(
+...
+```
++ change the onPressed(){..} to the following :
+```
+onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                    // Send request to Django and wait for the response
+                    // TODO: Change the URL to your Django app's URL. Don't forget to add the trailing slash (/) if needed.
+                    final response = await request.postJson(
+                    "http://127.0.0.1:8000/create-flutter/",
+                    jsonEncode(<String, String>{
+                        'name': _name,
+                        'species': _type,
+                        'amount': _amount.toString(),
+                        'spiritStatus': _severity,
+                        'causeOfDeath': _causality,
+                        'description': _description,
+                        // TODO: Adjust the fields with your Django model
+                    }));
+                    if (response['status'] == 'success') {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                        content: Text("New product has saved successfully!"),
+                        ));
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => MyHomePage()),
+                        );
+                    } else {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                            content:
+                                Text("Something went wrong, please try again."),
+                        ));
+                    }
+                }
+            }
+```
+
+## Grabbing JSON without the Making the Model?
+Can we retrieve JSON data without creating a model first? If yes, is it better than creating a model before retrieving JSON data?
+## CookieRequest
+ Explain the function of CookieRequest and explain why a CookieRequest instance needs to be shared with all components in a Flutter application
+## JSON Fetch
+ Explain the mechanism of fetching data from JSON until it can be displayed on Flutter.
+## Authentication 
+ Explain the authentication mechanism from entering account data on Flutter to Django authentication completion and the display of menus on Flutter.
+## Widget Used
+abcd
+
+
 
 
